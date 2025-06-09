@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15
+    container_name: petstore_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: petstore
+      POSTGRES_USER: petstore
+      POSTGRES_PASSWORD: petstore_pass
+    ports:
+      - "5432:5432"
+    networks:
+      - petstore_network
+
+  web:
+    build: ./backend
+    container_name: petstore_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://petstore:petstore_pass@db:5432/petstore
+    networks:
+      - petstore_network
+
+networks:
+  petstore_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
